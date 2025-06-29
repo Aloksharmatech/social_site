@@ -12,8 +12,8 @@ const {
     bookmarkPost,
 } = require("../controllers/post-controller");
 
-const isAuthenticated = require("../middlewares/isAuthenticated");
-const upload = require("../middlewares/multer");
+const isAuthenticated = require("../middleware/isAuthenticated");
+const upload = require("../middleware/multer");
 
 // Routes
 router.post("/add", isAuthenticated, upload.single("image"), addNewPost);

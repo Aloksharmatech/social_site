@@ -4,7 +4,7 @@ const User = require("../models/user-model");
 const Comment = require("../models/comment-model");
 const cloudinary = require("../config/cloudinary");
 
-export const addNewPost = async (req, res) => {
+const addNewPost = async (req, res) => {
     try {
         const { caption } = req.body;
         const image = req.file;
@@ -286,7 +286,7 @@ const addComment = async (req, res) => {
 };
 
 
-export const getCommentsOfPost = async (req, res) => {
+const getCommentsOfPost = async (req, res) => {
     try {
         const postId = req.params.id;
 

@@ -1,8 +1,8 @@
 const express = require("express");
-const isAuthenticated = require("../middlewares/isAuthenticated");
-const upload = require("../middlewares/multer");
+const isAuthenticated = require("../middleware/isAuthenticated");
+const upload = require("../middleware/multer");
 const router = express.Router();
-const { getProfile, editProfile, deleteProfilePicture } = require("../controllers/user-controller");
+const { getProfile, editProfile, deleteProfilePicture, followOrUnfollow } = require("../controllers/user-controller");
 
 
 router.get("/profile/:id", getProfile);
