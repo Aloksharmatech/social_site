@@ -44,7 +44,7 @@ const loginUser = async (req, res) => {
         }
 
         const normalizedEmail = email.toLowerCase();
-        let existingUser = await User.findOne({ email: normalizedEmail });
+        let existingUser = await User.findOne({ email: normalizedEmail }).populate("posts");
         if (!existingUser) {
             return res.status(401).json({
                 message: "Invalid email or password",
@@ -70,9 +70,14 @@ const loginUser = async (req, res) => {
             bio: existingUser.bio,
             followers: existingUser.followers,
             following: existingUser.following,
-            posts: populatedPosts
+            posts: existingUser.posts
         }
-        return res.cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000 }).json({
+        return res.cookie('token', token, { 
+            httpOnly: true, 
+            sameSite: 'none',
+            secure:true,
+            maxAge: 1 * 24 * 60 * 60 * 1000 
+            }).json({
             message: `Welcome back ${existingUser.username}`,
             success: true,
             existingUser

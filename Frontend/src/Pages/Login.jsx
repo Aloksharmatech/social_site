@@ -1,20 +1,30 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Simulate login
-    if (email && password) {
-      localStorage.setItem("token", "dummy-token");
+    if (!email || !password) {
+      return alert("Please fill in both email and password");
+    }
+
+    try {
+      const response = await API.post("/auth/login", { email, password });
+
+      const { existingUser } = response.data;
+      console.log(existingUser);
+
+      // alert(`Welcome back, ${existingUser.username}!`);
       navigate("/home");
-    } else {
-      alert("Please fill in all fields");
+    } catch (error) {
+      console.error("Login error:", error);
+      alert(error.response?.data?.message || "Login failed. Please try again.");
     }
   };
 
