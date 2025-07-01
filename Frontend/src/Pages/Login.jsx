@@ -1,32 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import API from "../api/axios";
+import {
+  loginUser,
+  clearError,
+  clearMessage,
+} from "../store/auth/auth-slice";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const { loading, error, message, isAuthenticated, user } = useSelector(
+    (state) => state.auth
+  );
 
+  const handleLogin = (e) => {
+    e.preventDefault();
     if (!email || !password) {
       return alert("Please fill in both email and password");
     }
 
-    try {
-      const response = await API.post("/auth/login", { email, password });
+    dispatch(loginUser({ email, password }));
 
-      const { existingUser } = response.data;
-      console.log(existingUser);
-
-      // alert(`Welcome back, ${existingUser.username}!`);
-      navigate("/home");
-    } catch (error) {
-      console.error("Login error:", error);
-      alert(error.response?.data?.message || "Login failed. Please try again.");
-    }
   };
+
+
+  useEffect(() => {
+    console.log("Auth State:", { isAuthenticated, user });
+  }, [isAuthenticated, user]);
+  
+  // Redirect after successful login
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log(isAuthenticated);
+      navigate("/home");
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  // Show errors/messages
+  useEffect(() => {
+    if (error) {
+      alert(error);
+      dispatch(clearError());
+    }
+
+    if (message) {
+      alert(message);
+      dispatch(clearMessage());
+    }
+  }, [error, message, dispatch]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center px-4">
@@ -65,9 +91,10 @@ const Login = () => {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg font-semibold transition"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 

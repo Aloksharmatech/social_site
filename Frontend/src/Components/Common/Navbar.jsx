@@ -6,13 +6,23 @@ import {
   FaCompass,
   FaFacebookMessenger,
   FaPlusSquare,
+  FaSignOutAlt, 
 } from "react-icons/fa";
 import { MdOutlineExplore } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../store/auth/auth-slice"; // adjust the import as per your structure
 
 const Navbar = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logoutUser()); 
+    navigate("/login"); 
+  };
 
   const navItems = [
     { to: "/home", icon: <FaHome />, label: "Home" },
@@ -29,7 +39,7 @@ const Navbar = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 border-r px-6 py-8 space-y-6 sticky top-0 h-screen bg-white">
         <div className="text-3xl font-bold mb-6">Instagram</div>
-        <nav className="flex flex-col gap-4">
+        <nav className="flex flex-col gap-4 flex-1">
           {navItems.map((item, index) => (
             <Link
               key={index}
@@ -42,6 +52,12 @@ const Navbar = () => {
             </Link>
           ))}
         </nav>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 text-lg text-red-600 hover:font-semibold"
+        >
+          <FaSignOutAlt /> Logout
+        </button>
       </aside>
 
       {/* Mobile Bottom Navbar */}

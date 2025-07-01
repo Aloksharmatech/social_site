@@ -59,7 +59,7 @@ const loginUser = async (req, res) => {
             })
         }
 
-        const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET_KEY, { expiresIn: "1d" });
 
 
         existingUser = {
@@ -119,6 +119,28 @@ const resetPassword = async (req, res) => {
     res.status(200).json({ message: "Password reset successful" });
 };
 
+
+const getCurrentUser = async (req, res) => {
+    try {
+        // Fetch the full user from DB using the ID from req.user
+        const user = await User.findById(req.user.id)
+            .select("-password") // exclude password
+            .populate("followers") 
+            .populate("following")
+            .populate("posts");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found", success: false });
+        }
+
+        res.status(200).json(user);
+    } catch (err) {
+        console.error("Failed to fetch user:", err.message);
+        res.status(500).json({ message: "Failed to fetch user", success: false });
+    }
+};
+
+
 const logout = async (req, res) => {
     try {
         res.clearCookie("token", {
@@ -139,4 +161,6 @@ const logout = async (req, res) => {
     }
 };
 
-module.exports = { registerStepOne, registerStepTwo, loginUser, forgotPassword, resetPassword, logout };
+
+
+module.exports = { registerStepOne, registerStepTwo, loginUser, forgotPassword, resetPassword, logout,getCurrentUser };
