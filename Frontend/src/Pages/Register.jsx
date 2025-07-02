@@ -1,6 +1,12 @@
-import React, { useState } from "react";
-import API from "../api/axios";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+  registerStepOne,
+  registerStepTwo,
+  clearError,
+  clearMessage,
+} from "../store/auth/auth-slice";
 
 const Register = () => {
   const [step, setStep] = useState(1);
@@ -8,40 +14,41 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { loading, error, message } = useSelector((state) => state.auth);
 
   const handleStepOne = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await API.post("/auth/register", { email });
-      alert("OTP sent to your email.");
-      setStep(2);
-    } catch (error) {
-      alert(error.response?.data?.message || "Failed to send OTP");
-    }
-    setLoading(false);
+    dispatch(registerStepOne(email));
   };
 
   const handleStepTwo = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await API.post("/auth/verify", {
-        email,
-        otp,
-        username,
-        password,
-      });
-      alert("Account created successfully");
-      navigate("/login");
-    } catch (error) {
-      alert(error.response?.data?.message || "Registration failed");
-    }
-    setLoading(false);
+    dispatch(registerStepTwo({ email, otp, username, password }));
   };
+
+  useEffect(() => {
+    if (message === "OTP sent to your email") {
+      setStep(2);
+    } else if (message === "Account created successfully") {
+      navigate("/login");
+    }
+
+    if (message) {
+      alert(message);
+      dispatch(clearMessage());
+    }
+  }, [message, dispatch, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      alert(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center px-4">

@@ -89,6 +89,20 @@ export const logoutUser = createAsyncThunk("auth/logout", async (_, thunkAPI) =>
     }
 });
 
+export const editProfile = createAsyncThunk(
+    "auth/editProfile",
+    async (formData, thunkAPI) => {
+        try {
+            const res = await API.put("/user/edit-profile", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return res.data.user;
+        } catch (err) {
+            return thunkAPI.rejectWithValue(err.response?.data?.message || "Profile update failed");
+        }
+    }
+);
+
 const authSlice = createSlice({
     name: "auth",
     initialState: {
@@ -181,6 +195,13 @@ const authSlice = createSlice({
             .addCase(logoutUser.rejected, (state, action) => {
                 state.error = action.payload;
                 state.isBootstrapped = true;
+            })
+            .addCase(editProfile.fulfilled, (state, action) => {
+                state.user = action.payload;
+                state.message = "Profile updated successfully";
+            })
+            .addCase(editProfile.rejected, (state, action) => {
+                state.error = action.payload;
             });
     },
 });

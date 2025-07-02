@@ -3,8 +3,7 @@ import { FaTh, FaBookmark, FaUserTag } from "react-icons/fa";
 import { MdOutlineVideoLibrary } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchCurrentUser } from "../store/auth/auth-slice";
-import API from "../api/axios";
+import { fetchCurrentUser, editProfile } from "../store/auth/auth-slice";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -15,6 +14,7 @@ const Profile = () => {
   );
 
   const [bio, setBio] = useState("");
+  const [gender, setGender] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -23,6 +23,7 @@ const Profile = () => {
       dispatch(fetchCurrentUser());
     } else {
       setBio(user.bio || "");
+      setGender(user.gender || "");
     }
   }, [dispatch, user]);
 
@@ -32,17 +33,24 @@ const Profile = () => {
     }
   }, [isBootstrapped, isAuthenticated, navigate]);
 
-  const handleProfileUpdate = async () => {
+  const handleProfileUpdate = () => {
     const formData = new FormData();
     if (profilePicture) formData.append("profilePicture", profilePicture);
     formData.append("bio", bio);
+    formData.append("gender", gender.toLowerCase());
 
+    dispatch(editProfile(formData))
+      .unwrap()
+      .then(() => setIsEditing(false))
+      .catch((err) => console.error("Failed to update profile:", err));
+  };
+
+  const handleProfilePictureDelete = async () => {
     try {
-      await API.put("/auth/update-profile", formData);
+      await API.delete("/user/delete-profile-picture");
       dispatch(fetchCurrentUser());
-      setIsEditing(false);
     } catch (err) {
-      console.error("Failed to update profile:", err);
+      console.error("Failed to delete profile picture:", err);
     }
   };
 
@@ -55,7 +63,7 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 text-gray-800">
       <div className="flex flex-col md:flex-row md:items-start gap-10">
-        <div className="flex justify-center md:block">
+        <div className="flex flex-col items-center md:block">
           <label htmlFor="profilePicture">
             <img
               src={
@@ -68,13 +76,23 @@ const Profile = () => {
             />
           </label>
           {isEditing && (
-            <input
-              id="profilePicture"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setProfilePicture(e.target.files[0])}
-              className="mt-2"
-            />
+            <>
+              <input
+                id="profilePicture"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setProfilePicture(e.target.files[0])}
+                className="mt-2"
+              />
+              {user.profilePicture && (
+                <button
+                  onClick={handleProfilePictureDelete}
+                  className="mt-2 text-xs text-red-600 underline"
+                >
+                  Remove current picture
+                </button>
+              )}
+            </>
           )}
         </div>
 
@@ -113,15 +131,35 @@ const Profile = () => {
             <div className="font-semibold">
               {user.fullName || user.username}
             </div>
+
             {isEditing ? (
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                className="w-full border p-2 rounded mt-1"
-                placeholder="Add a bio"
-              />
+              <>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="w-full border p-2 rounded mt-2"
+                  placeholder="Add a bio"
+                />
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full border p-2 rounded mt-2"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </>
             ) : (
-              <div className="text-gray-600">{user.bio || "Add a bio"}</div>
+              <>
+                <div className="text-gray-600">{user.bio || "Add a bio"}</div>
+                {user.gender && (
+                  <div className="text-gray-500 mt-1">
+                    Gender: {user.gender}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

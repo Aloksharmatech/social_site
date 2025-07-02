@@ -1,19 +1,22 @@
 import React from 'react'
+import { useSelector } from 'react-redux';
 
 const RightSide = () => {
+  const {user} = useSelector((state)=>state.auth);
+
   return (
     <>
       {" "}
       <aside className="hidden xl:block w-80 p-6">
         <div className="flex items-center gap-4 mb-6">
           <img
-            src="https://via.placeholder.com/40"
+            src={user.profilePicture}
             alt="profile"
             className="rounded-full w-10 h-10"
           />
           <div>
-            <div className="font-semibold">your_username</div>
-            <div className="text-sm text-gray-500">Your Name</div>
+            <div className="font-semibold">{user.username}</div>
+            <div className="text-sm text-gray-500">{user.username}</div>
           </div>
         </div>
         <div className="text-sm font-semibold text-gray-500 mb-2">
@@ -26,7 +29,7 @@ const RightSide = () => {
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img
-                    src="https://via.placeholder.com/32"
+                    src="https://picsum.photos/200"
                     className="rounded-full w-8 h-8"
                     alt="suggested"
                   />

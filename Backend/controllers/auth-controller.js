@@ -15,7 +15,7 @@ const registerStepOne = async (req, res) => {
     await OTP.create({ email, otp });
     await sendEmail(email, otp);
 
-    res.status(200).json({ message: "OTP sent to email" });
+    res.status(200).json({ message: "OTP sent to your email" });
 };
 
 const registerStepTwo = async (req, res) => {
