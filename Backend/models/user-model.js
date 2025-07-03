@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
     gender: { type: String, enum: ["male", "female"] },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    seeker: [{ type: mongoose.Schema.Types.ObjectId, ref: "PickRequest" }],
+    picks: [{ type: mongoose.Schema.Types.ObjectId, ref: "PickRequest" }],
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
 }, { timestamps: true });

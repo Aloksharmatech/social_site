@@ -3,15 +3,21 @@ import { FaTh, FaBookmark, FaUserTag } from "react-icons/fa";
 import { MdOutlineVideoLibrary } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchCurrentUser, editProfile } from "../store/auth/auth-slice";
+import {
+  fetchCurrentUser,
+  editProfile,
+  deleteProfilePicture,
+} from "../store/auth/auth-slice";
+import { toast, ToastContainer } from "react-toastify";
+import ClipLoader from "react-spinners/ClipLoader";
+import "react-toastify/dist/ReactToastify.css";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { user, isAuthenticated, loading, isBootstrapped } = useSelector(
-    (state) => state.auth
-  );
+  const { user, isAuthenticated, loading, isBootstrapped, status, error } =
+    useSelector((state) => state.auth);
 
   const [bio, setBio] = useState("");
   const [gender, setGender] = useState("");
@@ -41,17 +47,25 @@ const Profile = () => {
 
     dispatch(editProfile(formData))
       .unwrap()
-      .then(() => setIsEditing(false))
-      .catch((err) => console.error("Failed to update profile:", err));
+      .then(() => {
+        toast.success("Profile updated successfully!");
+        setIsEditing(false);
+      })
+      .catch(() => {
+        toast.error("Failed to update profile.");
+      });
   };
 
-  const handleProfilePictureDelete = async () => {
-    try {
-      await API.delete("/user/delete-profile-picture");
-      dispatch(fetchCurrentUser());
-    } catch (err) {
-      console.error("Failed to delete profile picture:", err);
-    }
+  const handleProfilePictureDelete = () => {
+    dispatch(deleteProfilePicture())
+      .unwrap()
+      .then(() => {
+        setProfilePicture(null);
+        toast.success("Profile picture removed.");
+      })
+      .catch(() => {
+        toast.error("Failed to delete profile picture.");
+      });
   };
 
   if (!isBootstrapped || loading || !user) {
@@ -89,8 +103,18 @@ const Profile = () => {
                   onClick={handleProfilePictureDelete}
                   className="mt-2 text-xs text-red-600 underline"
                 >
-                  Remove current picture
+                  {status === "loading" ? (
+                    <span className="flex items-center gap-1">
+                      <ClipLoader size={16} color="#dc2626" /> Removing
+                      picture...
+                    </span>
+                  ) : (
+                    "Remove current picture"
+                  )}
                 </button>
+              )}
+              {status === "failed" && error && (
+                <div className="text-red-600 text-xs mt-1">{error}</div>
               )}
             </>
           )}
@@ -110,7 +134,11 @@ const Profile = () => {
                 onClick={handleProfileUpdate}
                 className="bg-blue-500 text-white text-sm px-4 py-1 rounded-md font-semibold"
               >
-                Save
+                {status === "loading" ? (
+                  <ClipLoader size={16} color="#fff" />
+                ) : (
+                  "Save"
+                )}
               </button>
             )}
           </div>
@@ -155,7 +183,7 @@ const Profile = () => {
               <>
                 <div className="text-gray-600">{user.bio || "Add a bio"}</div>
                 {user.gender && (
-                  <div className="text-gray-500 mt-1">
+                  <div className="text-gray-500 mt-1 hidden">
                     Gender: {user.gender}
                   </div>
                 )}
@@ -205,6 +233,13 @@ const Profile = () => {
           </div>
         )}
       </div>
+
+      <ToastContainer
+        position="top-center"
+        autoClose={500}
+        toastClassName="text-sm p-2 rounded-lg shadow-md"
+        bodyClassName="text-sm"
+      />
     </div>
   );
 };

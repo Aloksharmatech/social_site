@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import {
-  loginUser,
-  clearError,
-  clearMessage,
-} from "../store/auth/auth-slice";
+import { loginUser, clearError, clearMessage } from "../store/auth/auth-slice";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,22 +20,20 @@ const Login = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     if (!email || !password) {
-      return alert("Please fill in both email and password");
+      toast.warn("Please fill in both email and password");
+      return;
     }
 
     dispatch(loginUser({ email, password }));
-
   };
-
 
   useEffect(() => {
     console.log("Auth State:", { isAuthenticated, user });
   }, [isAuthenticated, user]);
-  
+
   // Redirect after successful login
   useEffect(() => {
     if (isAuthenticated && user) {
-      console.log(isAuthenticated);
       navigate("/home");
     }
   }, [isAuthenticated, user, navigate]);
@@ -44,12 +41,12 @@ const Login = () => {
   // Show errors/messages
   useEffect(() => {
     if (error) {
-      alert(error);
+      toast.error(error);
       dispatch(clearError());
     }
 
     if (message) {
-      alert(message);
+      toast.success(message);
       dispatch(clearMessage());
     }
   }, [error, message, dispatch]);
@@ -105,6 +102,9 @@ const Login = () => {
           </a>
         </p>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={3000} pauseOnHover />
     </div>
   );
 };

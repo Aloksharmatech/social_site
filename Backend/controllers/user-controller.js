@@ -132,7 +132,7 @@ const suggestedUsers = async (req, res) => {
 
 const followOrUnfollow = async (req, res) => {
     try {
-        const currentUserId = req.id; // The logged-in user
+        const currentUserId = req.user.id; // The logged-in user
         const targetUserId = req.params.id; // The user to follow/unfollow
 
         if (currentUserId === targetUserId) {

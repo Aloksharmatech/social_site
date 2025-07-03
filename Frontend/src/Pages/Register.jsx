@@ -7,6 +7,8 @@ import {
   clearError,
   clearMessage,
 } from "../store/auth/auth-slice";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
   const [step, setStep] = useState(1);
@@ -33,19 +35,21 @@ const Register = () => {
   useEffect(() => {
     if (message === "OTP sent to your email") {
       setStep(2);
+      toast.success(message);
+      dispatch(clearMessage());
     } else if (message === "Account created successfully") {
+      toast.success(message);
+      dispatch(clearMessage());
       navigate("/login");
-    }
-
-    if (message) {
-      alert(message);
+    } else if (message) {
+      toast.info(message);
       dispatch(clearMessage());
     }
   }, [message, dispatch, navigate]);
 
   useEffect(() => {
     if (error) {
-      alert(error);
+      toast.error(error);
       dispatch(clearError());
     }
   }, [error, dispatch]);
@@ -137,6 +141,9 @@ const Register = () => {
           </a>
         </p>
       </div>
+
+      {/* Toast notifications */}
+      <ToastContainer position="top-right" autoClose={3000} pauseOnHover />
     </div>
   );
 };

@@ -89,6 +89,7 @@ export const logoutUser = createAsyncThunk("auth/logout", async (_, thunkAPI) =>
     }
 });
 
+// Edit Profile
 export const editProfile = createAsyncThunk(
     "auth/editProfile",
     async (formData, thunkAPI) => {
@@ -103,6 +104,19 @@ export const editProfile = createAsyncThunk(
     }
 );
 
+// Delete Profile Picture
+export const deleteProfilePicture = createAsyncThunk(
+    "auth/deleteProfilePicture",
+    async (_, thunkAPI) => {
+        try {
+            await API.delete("/user/delete-profile-picture");
+            return "Profile picture deleted successfully";
+        } catch (err) {
+            return thunkAPI.rejectWithValue(err.response?.data?.message || "Failed to delete profile picture");
+        }
+    }
+);
+
 const authSlice = createSlice({
     name: "auth",
     initialState: {
@@ -112,6 +126,7 @@ const authSlice = createSlice({
         error: null,
         message: null,
         isBootstrapped: false,
+        status: "idle"
     },
     reducers: {
         clearMessage: (state) => {
@@ -196,12 +211,29 @@ const authSlice = createSlice({
                 state.error = action.payload;
                 state.isBootstrapped = true;
             })
+            .addCase(editProfile.pending, (state) => {
+                state.status = "loading";
+            })
             .addCase(editProfile.fulfilled, (state, action) => {
                 state.user = action.payload;
                 state.message = "Profile updated successfully";
+                state.status = "succeeded";
             })
             .addCase(editProfile.rejected, (state, action) => {
                 state.error = action.payload;
+                state.status = "failed";
+            })
+            .addCase(deleteProfilePicture.pending, (state) => {
+                state.status = "loading";
+            })
+            .addCase(deleteProfilePicture.fulfilled, (state) => {
+                if (state.user) state.user.profilePicture = "";
+                state.message = "Profile picture deleted successfully";
+                state.status = "succeeded";
+            })
+            .addCase(deleteProfilePicture.rejected, (state, action) => {
+                state.error = action.payload;
+                state.status = "failed";
             });
     },
 });

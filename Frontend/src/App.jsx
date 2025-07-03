@@ -9,6 +9,7 @@ import HomeFeed from "./Pages/HomeFeed";
 import PrivateRoute from "./routes/PrivateRoute";
 import NotFound from "./Pages/Notfound";
 import { fetchCurrentUser } from "./store/auth/auth-slice";
+import UserProfile from "./Pages/UserProfile";
 
 function App() {
   const dispatch = useDispatch();
@@ -41,6 +42,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="profile/:id"
+            element={
+              <PrivateRoute>
+                <UserProfile />
               </PrivateRoute>
             }
           />
