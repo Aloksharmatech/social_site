@@ -179,4 +179,65 @@ const followOrUnfollow = async (req, res) => {
 };
 
 
-module.exports = { getProfile, editProfile, deleteProfilePicture, suggestedUsers , followOrUnfollow};
+
+const getUserFollowers = async (req, res) => {
+    try {
+        const targetUserId = req.params.id || req.user.id; // Use param ID if present, else current user
+
+        const user = await User.findById(targetUserId)
+            .select("username profilePicture")
+            .populate("followers", "username profilePicture"); // populate follower details except password
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false,
+            });
+        }
+
+        return res.status(200).json({
+            followers: user.followers,
+            followersCount: user.followers.length,
+            success: true,
+        });
+    } catch (error) {
+        console.error("Error fetching followers:", error);
+        return res.status(500).json({
+            message: "Server error",
+            success: false,
+        });
+    }
+};
+
+const getUserFollowing = async (req, res) => {
+    try {
+        const targetUserId = req.params.id || req.user.id; // Use param ID if present, else current user
+
+        const user = await User.findById(targetUserId)
+            .select("username profilePicture")
+            .populate("following", "username profilePicture"); // populate follower details except password
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false,
+            });
+        }
+
+        return res.status(200).json({
+            following: user.following,
+            followingCount: user.following.length,
+            success: true,
+        });
+    } catch (error) {
+        console.error("Error fetching followers:", error);
+        return res.status(500).json({
+            message: "Server error",
+            success: false,
+        });
+    }
+};
+
+
+
+module.exports = { getProfile, editProfile, deleteProfilePicture, suggestedUsers, followOrUnfollow, getUserFollowers, getUserFollowing };

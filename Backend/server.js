@@ -7,7 +7,8 @@ require("dotenv").config();
 const authRoutes = require('./routes/auth-routes');
 const userRoutes = require('./routes/user-routes');
 const postRoutes = require('./routes/post-routes'); 
-const messageRoutes = require('./routes/message-routes'); 
+const messageRoutes = require('./routes/message-routes');
+const pickRequestRoutes = require('./routes/pickRequest-routes'); 
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/posts', postRoutes); 
 app.use('/api/message', messageRoutes);
+app.use("/api/pickrequest", pickRequestRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

@@ -72,12 +72,12 @@ const loginUser = async (req, res) => {
             following: existingUser.following,
             posts: existingUser.posts
         }
-        return res.cookie('token', token, { 
-            httpOnly: true, 
+        return res.cookie('token', token, {
+            httpOnly: true,
             sameSite: 'none',
-            secure:true,
-            maxAge: 1 * 24 * 60 * 60 * 1000 
-            }).json({
+            secure: true,
+            maxAge: 1 * 24 * 60 * 60 * 1000
+        }).json({
             message: `Welcome back ${existingUser.username}`,
             success: true,
             existingUser
@@ -125,8 +125,8 @@ const getCurrentUser = async (req, res) => {
         // Fetch the full user from DB using the ID from req.user
         const user = await User.findById(req.user.id)
             .select("-password") // exclude password
-            .populate("followers") 
-            .populate("following")
+            .populate({ path: "followers", select: "-password" })
+            .populate({ path: "following", select: "-password" })
             .populate("posts");
 
         if (!user) {
@@ -163,4 +163,4 @@ const logout = async (req, res) => {
 
 
 
-module.exports = { registerStepOne, registerStepTwo, loginUser, forgotPassword, resetPassword, logout,getCurrentUser };
+module.exports = { registerStepOne, registerStepTwo, loginUser, forgotPassword, resetPassword, logout, getCurrentUser };
