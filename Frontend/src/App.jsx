@@ -1,20 +1,22 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
-import Home from "./Pages/Home";
+import Home from "./Pages/Home"; // this should have <Outlet />
 import Profile from "./Pages/Profile";
 import HomeFeed from "./Pages/HomeFeed";
 import PrivateRoute from "./routes/PrivateRoute";
 import NotFound from "./Pages/Notfound";
 import { fetchCurrentUser } from "./store/auth/auth-slice";
 import UserProfile from "./Pages/UserProfile";
+import FollowersList from "./Components/Common/FollowerList";
+import FollowingList from "./Components/Common/FollowingList";
+import SeekersList from "./Components/Common/SeekersList";
 
 function App() {
   const dispatch = useDispatch();
 
-  // Fetch user on app load (bootstrap)
   useEffect(() => {
     dispatch(fetchCurrentUser());
   }, [dispatch]);
@@ -37,6 +39,7 @@ function App() {
           }
         >
           <Route index element={<HomeFeed />} />
+
           <Route
             path="profile"
             element={
@@ -45,6 +48,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="profile/:id"
             element={
@@ -53,9 +57,35 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          <Route
+            path="profile/:id/followers/:id"
+            element={
+              <PrivateRoute>
+                <FollowersList />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="profile/:id/following/:id"
+            element={
+              <PrivateRoute>
+                <FollowingList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="profile/:id/seekers/:id"
+            element={
+              <PrivateRoute>
+                <SeekersList />
+              </PrivateRoute>
+            }
+          />
         </Route>
 
-        {/* Fallback Route */}
+        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

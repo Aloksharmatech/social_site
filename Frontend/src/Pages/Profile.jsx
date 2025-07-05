@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaTh, FaBookmark, FaUserTag } from "react-icons/fa";
 import { MdOutlineVideoLibrary } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   fetchCurrentUser,
   editProfile,
@@ -143,23 +143,37 @@ const Profile = () => {
             )}
           </div>
 
-          <div className="flex gap-6 text-sm mb-4">
+          <div className="flex flex-wrap gap-6 text-sm mb-4">
             <span>
               <strong>{user.posts?.length || 0}</strong> posts
             </span>
-            <span>
+            <Link
+              to={`profile/followers/${user._id}`}
+              className="hover:underline"
+            >
               <strong>{user.followers?.length || 0}</strong> followers
-            </span>
-            <span>
+            </Link>
+            <Link
+              to={`profile/following/${user._id}`}
+              className="hover:underline"
+            >
               <strong>{user.following?.length || 0}</strong> following
-            </span>
+            </Link>
+            <Link
+              to={`profile/seekers/${user._id}`}
+              className="hover:underline"
+            >
+              <strong>{user.seekers?.length || 0}</strong> seekers
+            </Link>
+            <Link to={`profile/picks/${user._id}`} className="hover:underline">
+              <strong>{user.picks?.length || 0}</strong> picks
+            </Link>
           </div>
 
           <div className="text-sm">
             <div className="font-semibold">
               {user.fullName || user.username}
             </div>
-
             {isEditing ? (
               <>
                 <textarea

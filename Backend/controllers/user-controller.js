@@ -12,7 +12,23 @@ const getProfile = async (req, res) => {
                 path: 'posts',
                 options: { sort: { createdAt: -1 } }
             })
-            .populate('bookmarks');
+            .populate('bookmarks')
+            .populate({
+                path:'seekers',
+                populate:{
+                    path:'sender',
+                    select:"username profilePicture"
+                }
+
+            })
+            .populate({
+                path:'seekers',
+                populate: {
+                    path: 'receiver',
+                    select: "username profilePicture"
+                }
+
+            });
         return res.status(200).json({
             user,
             success: true

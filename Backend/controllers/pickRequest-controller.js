@@ -2,21 +2,41 @@ const User = require("../models/user-model");
 const PickRequest = require("../models/pickRequest-model");
 
 
+
+// Create a Pick Request
 const createPickRequest = async (req, res) => {
     try {
         const { receiverId, duration, offeredAmount, expirationDuration } = req.body;
         const senderId = req.user.id;
 
-        const currentUser = await User.findById(senderId);
-        const targetUser = await User.findById(receiverId);
+        // Check if both users exist
+        const [currentUser, targetUser] = await Promise.all([
+            User.findById(senderId),
+            User.findById(receiverId),
+        ]);
 
         if (!currentUser || !targetUser) {
             return res.status(404).json({
-                message: 'User not found',
-                success: false
+                message: "User not found",
+                success: false,
             });
         }
 
+        // Prevent duplicate pending pick requests
+        const existingRequest = await PickRequest.findOne({
+            sender: senderId,
+            receiver: receiverId,
+            status: "pending",
+        });
+
+        if (existingRequest) {
+            return res.status(400).json({
+                message: "A pending pick request already exists.",
+                success: false,
+            });
+        }
+
+        // Create new PickRequest
         const pickRequest = new PickRequest({
             sender: senderId,
             receiver: receiverId,
@@ -27,16 +47,28 @@ const createPickRequest = async (req, res) => {
 
         await pickRequest.save();
 
-        // Update users' picks and seekers list
-        await User.findByIdAndUpdate(senderId, { $push: { picks: pickRequest._id } });
-        await User.findByIdAndUpdate(receiverId, { $push: { seekers: pickRequest._id } });
+        // Update sender's picks and receiver's seekers
+        await Promise.all([
+            User.findByIdAndUpdate(senderId, { $push: { picks: pickRequest._id } }),
+            User.findByIdAndUpdate(receiverId, { $push: { seekers: pickRequest._id } }),
+        ]);
 
-        res.status(201).json({ message: "Pick request created", pickRequest });
+        res.status(201).json({
+            message: "Pick request created",
+            success: true,
+        });
     } catch (error) {
         console.error("Create PickRequest error:", error);
-        res.status(500).json({ message: "Server error creating pick request" });
+        res.status(500).json({
+            message: "Server error creating pick request",
+            error: error.message,
+            success: false,
+        });
     }
 };
+
+
+
 
 
 
