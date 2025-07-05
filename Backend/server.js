@@ -10,10 +10,16 @@ const postRoutes = require('./routes/post-routes');
 const messageRoutes = require('./routes/message-routes');
 const pickRequestRoutes = require('./routes/pickRequest-routes'); 
 
+
+
 const app = express();
 
 // Connect to MongoDB
 ConnectDB();
+
+// Run background jobs
+require('./cron-jobs/expiredPickRequestCleaner');
+
 
 // Middlewares
 app.use(cors({

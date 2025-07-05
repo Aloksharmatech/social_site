@@ -1,21 +1,25 @@
 const User = require("../models/user-model");
 const PickRequest = require("../models/pickRequest-model");
+const mongoose = require("mongoose");
 
 
-
-// Create a Pick Request
+// Create a Pick Request with Transaction
 const createPickRequest = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
         const { receiverId, duration, offeredAmount, expirationDuration } = req.body;
         const senderId = req.user.id;
 
         // Check if both users exist
         const [currentUser, targetUser] = await Promise.all([
-            User.findById(senderId),
-            User.findById(receiverId),
+            User.findById(senderId).session(session),
+            User.findById(receiverId).session(session),
         ]);
 
         if (!currentUser || !targetUser) {
+            await session.abortTransaction();
             return res.status(404).json({
                 message: "User not found",
                 success: false,
@@ -27,9 +31,10 @@ const createPickRequest = async (req, res) => {
             sender: senderId,
             receiver: receiverId,
             status: "pending",
-        });
+        }).session(session);
 
         if (existingRequest) {
+            await session.abortTransaction();
             return res.status(400).json({
                 message: "A pending pick request already exists.",
                 success: false,
@@ -45,20 +50,27 @@ const createPickRequest = async (req, res) => {
             expirationDuration,
         });
 
-        await pickRequest.save();
+        await pickRequest.save({ session });
 
         // Update sender's picks and receiver's seekers
         await Promise.all([
-            User.findByIdAndUpdate(senderId, { $push: { picks: pickRequest._id } }),
-            User.findByIdAndUpdate(receiverId, { $push: { seekers: pickRequest._id } }),
+            User.findByIdAndUpdate(senderId, { $push: { picks: pickRequest._id } }, { session }),
+            User.findByIdAndUpdate(receiverId, { $push: { seekers: pickRequest._id } }, { session }),
         ]);
+
+        // Commit the transaction (everything is saved)
+        await session.commitTransaction();
+        session.endSession();
 
         res.status(201).json({
             message: "Pick request created",
+            pickRequest,
             success: true,
         });
     } catch (error) {
         console.error("Create PickRequest error:", error);
+        await session.abortTransaction();
+        session.endSession();
         res.status(500).json({
             message: "Server error creating pick request",
             error: error.message,
@@ -66,6 +78,8 @@ const createPickRequest = async (req, res) => {
         });
     }
 };
+
+
 
 
 
@@ -129,14 +143,7 @@ const deletePickRequest = async (req, res) => {
         const pickRequest = await PickRequest.findById(req.params.id);
         if (!pickRequest) return res.status(404).json({ message: "PickRequest not found" });
 
-        const senderId = pickRequest.sender;
-        const receiverId = pickRequest.receiver;
-
-        // Remove from User collections
-        await User.findByIdAndUpdate(senderId, { $pull: { picks: pickRequest._id } });
-        await User.findByIdAndUpdate(receiverId, { $pull: { seekers: pickRequest._id } });
-
-        await PickRequest.findByIdAndDelete(req.params.id);
+        await pickRequest.deleteOne(); 
 
         res.status(200).json({ message: "Pick request deleted" });
     } catch (error) {
@@ -144,6 +151,7 @@ const deletePickRequest = async (req, res) => {
         res.status(500).json({ message: "Server error deleting pick request" });
     }
 };
+
 
 module.exports = {
     createPickRequest,
