@@ -6,6 +6,7 @@ import followUnfollowReducer from "./user/followUnfollow-slice"
 import userFollowersReducer from "./user/userFollower-slice"
 import userFollowingReducer from "./user/userFollowing-slice"
 import pickRequestReducer from "./pickRequest/pickRequest-slice"
+import deletePickRequestReducer from "./pickRequest/deletePickRequest-slice"
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         userFollowers: userFollowersReducer,
         userFollowing: userFollowingReducer,
         pickRequest:pickRequestReducer,
+        deletePickRequest:deletePickRequestReducer,
 
     },
 })

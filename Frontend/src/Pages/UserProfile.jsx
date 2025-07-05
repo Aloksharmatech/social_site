@@ -39,7 +39,7 @@ const UserProfile = () => {
     try {
       await dispatch(followOrUnfollow(profileUser._id)).unwrap();
       dispatch(getProfile(profileUser._id));
-      dispatch(fetchCurrentUser());
+      await dispatch(fetchCurrentUser());
     } catch (error) {
       console.error("Error following/unfollowing:", error);
     }
@@ -72,7 +72,8 @@ const UserProfile = () => {
         .unwrap()
         .then((data) => {
           console.log("Pick Request Created:", data);
-          // toast.success("Offer sent successfully!");
+          dispatch(getProfile(profileUser._id));
+
           setShowOfferForm(false);
           dispatch(fetchCurrentUser());
         });

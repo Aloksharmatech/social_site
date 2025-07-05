@@ -64,6 +64,7 @@ const Login = () => {
             </label>
             <input
               type="email"
+              name="email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
               placeholder="you@example.com"
               value={email}
@@ -78,6 +79,7 @@ const Login = () => {
             </label>
             <input
               type="password"
+              name="password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
               placeholder="••••••••"
               value={password}

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { getProfile } from "../../store/user/userProfile-slice";
-// import { acceptSeekerRequest, rejectSeekerRequest } from "../../store/yourActions";
+import { fetchCurrentUser } from "../../store/auth/auth-slice";
 
 const SeekersList = () => {
   const { id } = useParams();
@@ -19,46 +19,25 @@ const SeekersList = () => {
     }
   }, [dispatch, id]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(getProfile(id));
+      dispatch(fetchCurrentUser());
+    }, 10000); // Refresh every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [dispatch, id]);
+
   const isOwnProfile =
     profileUser && currentUser && profileUser._id === currentUser._id;
 
-  const handleAccept = async (seekerId) => {
-    try {
-      // await dispatch(acceptSeekerRequest(seekerId)).unwrap();
-      dispatch(getProfile(id));
-    } catch (err) {
-      console.error("Error accepting seeker:", err);
-    }
-  };
-
-  const handleReject = async (seekerId) => {
-    try {
-      // await dispatch(rejectSeekerRequest(seekerId)).unwrap();
-      dispatch(getProfile(id));
-    } catch (err) {
-      console.error("Error rejecting seeker:", err);
-    }
-  };
-
   if (loading)
-    return (
-      <div className="flex justify-center items-center py-20 text-gray-500">
-        Loading...
-      </div>
-    );
-
+    return <div className="text-center py-20 text-gray-500">Loading...</div>;
   if (error)
-    return (
-      <div className="flex justify-center items-center py-20 text-red-500">
-        {error}
-      </div>
-    );
-
+    return <div className="text-center py-20 text-red-500">{error}</div>;
   if (!profileUser)
     return (
-      <div className="flex justify-center items-center py-20 text-gray-500">
-        User not found.
-      </div>
+      <div className="text-center py-20 text-gray-500">User not found.</div>
     );
 
   const seekers = profileUser.seekers || [];
@@ -95,7 +74,6 @@ const SeekersList = () => {
                     {seeker.sender?.username || "Unknown"}
                   </Link>
 
-                  {/* Show status only if it's own profile */}
                   {isOwnProfile && (
                     <p className="text-sm text-gray-500 mt-1">
                       Status:{" "}
@@ -122,17 +100,16 @@ const SeekersList = () => {
                 </div>
               </div>
 
-              {/* Show Accept/Reject only on own profile and when status is pending */}
               {isOwnProfile && seeker.status === "pending" && (
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleAccept(seeker._id)}
+                    onClick={() => console.log("Accept", seeker._id)}
                     className="bg-green-500 text-white text-xs px-3 py-1 rounded-full hover:bg-green-600 transition-all duration-200 ease-in-out"
                   >
                     Accept
                   </button>
                   <button
-                    onClick={() => handleReject(seeker._id)}
+                    onClick={() => console.log("Reject", seeker._id)}
                     className="bg-red-500 text-white text-xs px-3 py-1 rounded-full hover:bg-red-600 transition-all duration-200 ease-in-out"
                   >
                     Reject

@@ -24,14 +24,17 @@ const Profile = () => {
   const [profilePicture, setProfilePicture] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Always fetch the latest user data when profile mounts
   useEffect(() => {
-    if (!user) {
-      dispatch(fetchCurrentUser());
-    } else {
+    dispatch(fetchCurrentUser());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (user) {
       setBio(user.bio || "");
       setGender(user.gender || "");
     }
-  }, [dispatch, user]);
+  }, [user]);
 
   useEffect(() => {
     if (isBootstrapped && !isAuthenticated) {
@@ -50,6 +53,7 @@ const Profile = () => {
       .then(() => {
         toast.success("Profile updated successfully!");
         setIsEditing(false);
+        dispatch(fetchCurrentUser()); // refresh the profile after update
       })
       .catch(() => {
         toast.error("Failed to update profile.");
@@ -62,6 +66,7 @@ const Profile = () => {
       .then(() => {
         setProfilePicture(null);
         toast.success("Profile picture removed.");
+        dispatch(fetchCurrentUser()); // refresh the profile after deleting picture
       })
       .catch(() => {
         toast.error("Failed to delete profile picture.");
